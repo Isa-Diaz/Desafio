@@ -1,26 +1,28 @@
- 🏦 Sistema Bancário em Microserviços 🏦
-=====================================================
- Sobre o Projeto
 
-Projeto criado como parte de um desafio de microserviços, com foco em regras bancárias simples, arquitetura limpa e testes unitários.
-Ele possui dois serviços separados:
+# 🏦 Sistema Bancário em Microserviços 🏦
 
-    Microserviço Acesso
-Responsável pela lógica do sistema, como:
+##  Sobre o Projeto
+Projeto desenvolvido como parte de um desafio de microserviços, com foco em regras bancárias simples, arquitetura limpa e testes unitários.
 
-validação de dados
-criação e atualização de clientes
-cálculo de score
-operações bancárias (saque e depósito)
-regras de cheque especial
-comunicação com o microserviço de banco de dados
+O sistema é dividido em dois microserviços:
 
-    Microserviço Armazenamento
-Responsável por salvar e buscar os dados no banco (SQLite).
+### **Microserviço Acesso**
+Responsável por:
+- Validação de dados  
+- Criação e atualização de clientes  
+- Cálculo de score  
+- Operações bancárias (saque e depósito)  
+- Regras de cheque especial  
+- Comunicação com o microserviço de armazenamento  
+
+### **Microserviço Armazenamento**
+Responsável por salvar e retornar os dados usando um banco SQLite.
 
 ---
-    Arquitetura (resumo)
 
+## 🏗 Arquitetura
+
+```
 servidor/
 │
 ├── acesso/             → Lógica e regras
@@ -28,58 +30,77 @@ servidor/
 ├── micro_servico/      → Armazenamento (SQLite)
 │
 └── tests/              → Testes com pytest
-
-
----
-🚩 Regras Principais
-
-    Score:
-Score não pode ser um número inferior a zero
-Enquanto saldo for mais que zero multiplicaremos saldo por 0.1 para obter o score
-
-
-    Limite (cheque especial):
-Assim como bancos reais é possivel usar cheque especial, no nosso sistema não é diferente, o calculo é baseado no score multiplicado por 3
-
-
-    Operações:
-Depósito: soma ao saldo
-Saque: só permitido se não ultrapassar o limite do cheque especial
+```
 
 ---
-    Endpoints Importantes
-Microserviço Acesso
-POST /clientes
-GET /clientes
-GET /clientes/<id>
-PUT /clientes/<id>
+
+## 🚩 Regras Principais
+
+### **Score**
+- Score nunca pode ser menor que zero  
+- Quando o saldo é maior que zero, o score é calculado como:  
+  **score = saldo × 0.1**
+
+### **Cheque Especial (Limite)**
+- O sistema permite uso de cheque especial  
+- O limite é calculado como:  
+  **limite = score × 3**
+
+### **Operações**
+- Depósito: soma ao saldo  
+- Saque: permitido apenas se não ultrapassar saldo + limite  
+
+---
+
+## 🔗 Endpoints Importantes
+
+### **Microserviço de Acesso**
+```
+POST   /clientes
+GET    /clientes
+GET    /clientes/<id>
+PUT    /clientes/<id>
 DELETE /clientes/<id>
-GET /clientes/<id>/score
-POST /clientes/<id>/operacao
-Microserviço Armazenamento
-Possui CRUD básico.
----
-🧪 Testes Unitários
-Para esse teste foi usado o pytest (É importante que baixe a biblioteca )
-validações
-cálculos
-serviços (com mock)
-Rodar testes:
+GET    /clientes/<id>/score
+POST   /clientes/<id>/operacao
+```
 
-    Para verificar é só rodar o codigo abaixo no seu terminal:
+### **Microserviço de Armazenamento**
+- CRUD básico para clientes
+
+---
+
+## 🧪 Testes Unitários
+Os testes utilizam **pytest**.
+
+São testados:
+- Validações  
+- Cálculos  
+- Serviços (com mock)
+
+Para executar os testes:
+
+```
 pytest -vv
+```
+
 ---
 
-    Como rodar o projeto
-1. Instalar dependências:
+## 🚀 Como Rodar o Projeto
+
+### 1. Instalar dependências
+```
 pip install flask requests pytest pytest-cov
+```
 
-
-2. Rodar microserviço de armazenamento:
+### 2. Iniciar microserviço de armazenamento
+```
 cd micro_servico
 python3 controller.py
+```
 
-
-3. Rodar microserviço de acesso:
+### 3. Iniciar microserviço de acesso
+```
 cd acesso
 python3 controller.py
+```
