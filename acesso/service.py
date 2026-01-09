@@ -1,4 +1,4 @@
-from servidor.acesso.client import criar_cliente, atualizar_cliente, buscar_cliente_por_id
+from .client import criar_cliente, atualizar_cliente, buscar_cliente_por_id
 
 def validar_dados(dados):
 
