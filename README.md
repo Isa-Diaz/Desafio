@@ -95,12 +95,10 @@ pip install flask requests pytest pytest-cov
 
 ### 2. Iniciar microserviço de armazenamento
 ```
-cd micro_servico
-python3 controller.py
+python3 -m micro_servico.controller
 ```
 
 ### 3. Iniciar microserviço de acesso
 ```
-cd acesso
-python3 controller.py
+python3 -m acesso.controller
 ```
