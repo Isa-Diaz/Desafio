@@ -79,6 +79,7 @@ São testados:
 - Serviços (com mock)
 
 Para executar os testes:
+*Antes de tudo, verifique se o nome do arquivo está como "servidor" e não "servidor -main" (por padrão o github baixa o arquivo com esse nome)
 
 ```
 pytest -vv
