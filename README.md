@@ -1,105 +1,256 @@
+---
 
 # 🏦 Sistema Bancário em Microserviços 🏦
 
-##  Sobre o Projeto
-Projeto desenvolvido como parte de um desafio de microserviços, com foco em regras bancárias simples, arquitetura limpa e testes unitários.
+## Sobre o Projeto
 
-O sistema é dividido em dois microserviços:
+Este projeto foi desenvolvido como um desafio utilizando arquitetura de microserviços para simular um sistema bancário simples.
+Ele é dividido em dois serviços independentes:
 
-### **Microserviço Acesso**
+### 🔷 Microserviço Acesso
+
 Responsável por:
-- Validação de dados  
-- Criação e atualização de clientes  
-- Cálculo de score  
-- Operações bancárias (saque e depósito)  
-- Regras de cheque especial  
-- Comunicação com o microserviço de armazenamento  
 
-### **Microserviço Armazenamento**
-Responsável por salvar e retornar os dados usando um banco SQLite.
+* Validação de dados
+* Regras bancárias
+* Cálculo de score e limite
+* Operações (saque/deposito)
+* Comunicação com o microserviço de armazenamento
+
+### 🔶 Microserviço Armazenamento
+
+Responsável por:
+
+* Persistência dos dados em SQLite
+* CRUD completo
+* Respostas diretas ao microserviço de acesso
 
 ---
 
-## 🏗 Arquitetura
+## Tecnologias Utilizadas
+
+* Python
+* Flask
+* SQLite
+* Requests
+* Pytest
+
+---
+
+## Arquitetura do Projeto
 
 ```
 servidor/
 │
-├── acesso/             → Lógica e regras
+├── acesso/
+│   ├── client.py
+│   ├── controller.py
+│   ├── service.py
+│   └── __init__.py
 │
-├── micro_servico/      → Armazenamento (SQLite)
+├── micro_servico/
+│   ├── controller.py
+│   ├── repository.py
+│   ├── database.py
+│   └── __init__.py
 │
-└── tests/              → Testes com pytest
+└── tests/
 ```
 
 ---
 
-## 🚩 Regras Principais
+## Fluxo Geral
 
-### **Score**
-- Score nunca pode ser menor que zero  
-- Quando o saldo é maior que zero, o score é calculado como:  
-  **score = saldo × 0.1**
+### Criar Cliente
 
-### **Cheque Especial (Limite)**
-- O sistema permite uso de cheque especial  
-- O limite é calculado como:  
-  **limite = score × 3**
+1. Requisição chega no microserviço Acesso
+2. Os dados são validados
+3. O score é calculado
+4. Os dados são enviados ao microserviço Armazenamento
+5. A resposta final é retornada ao usuário
 
-### **Operações**
-- Depósito: soma ao saldo  
-- Saque: permitido apenas se não ultrapassar saldo + limite  
+### Operações Bancárias
+
+* Saque e depósito
+* Regras de cheque especial
+* Score recalculado após cada operação
 
 ---
 
-## 🔗 Endpoints Importantes
+## 🚨 Regras de Negócio
 
-### **Microserviço de Acesso**
+### Score
+
+```
+score = saldo × 0.1
+```
+
+Nunca pode ser menor que zero.
+
+### Cheque Especial
+
+```
+limite = score × 3
+```
+
+### Saque
+
+Permitido somente se:
+
+```
+novo_saldo >= -limite
+```
+
+### Validações Obrigatórias
+
+* nome → string
+* telefone → string numérica (10–11 dígitos)
+* correntista → boolean
+* saldo_cc → número ≥ 0
+
+---
+
+# 🔗 Endpoints e Exemplos de Requisição
+
+---
+
+# 🔷 Microserviço de Acesso
+
+**Base URL:** `http://127.0.0.1:5001`
+
+---
+
+## 📌 Criar Cliente
+
+### **POST /clientes**
+
+### Corpo da requisição:
+
+```json
+{
+  "nome": "Isa",
+  "telefone": "11987654321",
+  "correntista": true,
+  "saldo_cc": 200
+}
+```
+
+---
+
+## 📌 Listar Clientes
+
+### **GET /clientes**
+
+---
+
+## 📌 Buscar Cliente
+
+### **GET /clientes/1**
+
+---
+
+## 📌 Atualizar Cliente
+
+### **PUT /clientes/1**
+
+### Exemplo:
+
+```json
+{
+  "nome": "Isabella",
+  "telefone": "11999998888"
+}
+```
+
+---
+
+## 📌 Deletar Cliente
+
+### **DELETE /clientes/1**
+
+---
+
+## 📌 Consultar Score
+
+### **GET /clientes/1/score**
+
+---
+
+## 📌 Operação (saque/deposito)
+
+### **POST /clientes/1/operacao**
+
+### Depósito:
+
+```json
+{
+  "tipo": "deposito",
+  "valor": 100
+}
+```
+
+### Saque:
+
+```json
+{
+  "tipo": "saque",
+  "valor": 50
+}
+```
+
+---
+
+# 🔶 Microserviço de Armazenamento
+
+**Base URL:** `http://127.0.0.1:5000`
+
+### Endpoints:
+
 ```
 POST   /clientes
 GET    /clientes
 GET    /clientes/<id>
 PUT    /clientes/<id>
 DELETE /clientes/<id>
-GET    /clientes/<id>/score
-POST   /clientes/<id>/operacao
 ```
-
-### **Microserviço de Armazenamento**
-- CRUD básico para clientes
 
 ---
 
-## 🧪 Testes Unitários
-Os testes utilizam **pytest**.
+# 🚀 Como Executar o Projeto
 
-São testados:
-- Validações  
-- Cálculos  
-- Serviços (com mock)
+### 1️⃣ Instalar dependências
 
-Para executar os testes:
-*Antes de tudo, verifique se o nome do arquivo está como "servidor" e não "servidor -main" (por padrão o github baixa o arquivo com esse nome)
+```
+pip install flask requests pytest pytest-cov
+```
+
+### 2️⃣ Iniciar microserviço de armazenamento
+
+```
+python3 -m micro_servico.controller
+```
+
+### 3️⃣ Iniciar microserviço de acesso
+
+```
+python3 -m acesso.controller
+```
+
+---
+
+# 🧪 Testes Unitários
+
+### Rodar os testes:
 
 ```
 pytest -vv
 ```
 
+São testados:
+
+* Validações
+* Regras de score e limite
+* Serviços
+* Operações bancárias
+
 ---
-
-## 🚀 Como Rodar o Projeto
-
-### 1. Instalar dependências
-```
-pip install flask requests pytest pytest-cov
-```
-
-### 2. Iniciar microserviço de armazenamento
-```
-python3 -m micro_servico.controller
-```
-
-### 3. Iniciar microserviço de acesso
-```
-python3 -m acesso.controller
-```
