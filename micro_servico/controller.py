@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flasgger import Swagger
 from micro_servico.repository import (
     create_table,
     insert_cliente,
@@ -9,15 +10,50 @@ from micro_servico.repository import (
 )
 
 app = Flask(__name__)
+swagger = Swagger(app)
 create_table()
-
 
 @app.route("/status", methods=["GET"])
 def status():
+    """
+    Verificar status do microserviço
+    ---
+    tags:
+      - Status
+    responses:
+      200:
+        description: Serviço funcionando
+    """
     return jsonify({"mensagem": "Microserviço de Armazenamento está funcionando."})
 
 @app.route("/clientes", methods=["POST"])
 def criar_cliente():
+    """
+    Criar cliente no armazenamento
+    ---
+    tags:
+      - Clientes
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+              telefone:
+                type: integer
+              correntista:
+                type: boolean
+              score_credito:
+                type: number
+              saldo_cc:
+                type: number
+    responses:
+      201:
+        description: Cliente criado com sucesso
+    """
     dados = request.get_json()
 
     cliente_id = insert_cliente(
@@ -33,6 +69,15 @@ def criar_cliente():
 
 @app.route("/clientes", methods=["GET"])
 def listar():
+    """
+    Listar todos os clientes
+    ---
+    tags:
+      - Clientes
+    responses:
+      200:
+        description: Lista de clientes cadastrados
+    """
     linhas = listar_clientes()
     lista = []
 
@@ -50,6 +95,22 @@ def listar():
 
 @app.route("/clientes/<id>", methods=["GET"])
 def buscar(id):
+    """
+    Buscar cliente por ID
+    ---
+    tags:
+      - Clientes
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Cliente encontrado
+      404:
+        description: Cliente não encontrado
+    """
     linha = buscar_cliente_por_id(int(id))
 
     if not linha:
@@ -68,6 +129,39 @@ def buscar(id):
 
 @app.route("/clientes/<id>", methods=["PUT"])
 def atualizar(id):
+    """
+    Atualizar cliente por ID
+    ---
+    tags:
+      - Clientes
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nome:
+                type: string
+              telefone:
+                type: integer
+              correntista:
+                type: boolean
+              score_credito:
+                type: number
+              saldo_cc:
+                type: number
+    responses:
+      200:
+        description: Cliente atualizado
+      404:
+        description: Cliente não encontrado
+    """
     dados = request.get_json()
 
     atualizar_cliente(
@@ -84,15 +178,28 @@ def atualizar(id):
 
 @app.route("/clientes/<id>", methods=["DELETE"])
 def excluir(id):
+    """
+    Excluir cliente por ID
+    ---
+    tags:
+      - Clientes
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Cliente deletado
+      404:
+        description: Cliente não encontrado
+    """
     linha = buscar_cliente_por_id(int(id))
 
     if not linha:
         return jsonify({"erro": "Cliente não encontrado"}), 404
-
     delete_cliente(int(id))
-
     return jsonify({"sucesso": "Cliente deletado"}), 200
-
 
 
 if __name__ == "__main__":
