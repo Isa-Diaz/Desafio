@@ -1,27 +1,25 @@
-
 # 🏦 Sistema Bancário em Microserviços 🏦
 
 ## Sobre o Projeto
 
-Este projeto foi desenvolvido como um desafio utilizando arquitetura de microserviços para simular um sistema bancário simples.
-Ele é dividido em dois serviços independentes:
+Este projeto utiliza arquitetura de microserviços para simular um sistema bancário simples composto por dois serviços independentes:
 
-### 🔷 Microserviço Acesso
+### 🔷 Microserviço Acesso (porta 5001)
 
 Responsável por:
 
 * Validação de dados
 * Regras bancárias
 * Cálculo de score e limite
-* Operações (saque/deposito)
+* Saque e depósito
 * Comunicação com o microserviço de armazenamento
 
-### 🔶 Microserviço Armazenamento
+### 🔶 Microserviço Armazenamento (porta 5000)
 
 Responsável por:
 
-* Persistência dos dados em SQLite
-* CRUD completo
+* Persistência dos dados
+* CRUD completo em SQLite
 * Respostas diretas ao microserviço de acesso
 
 ---
@@ -62,29 +60,28 @@ servidor/
 
 ### Criar Cliente
 
-1. Requisição chega no microserviço Acesso
-2. Os dados são validados
-3. O score é calculado
-4. Os dados são enviados ao microserviço Armazenamento
-5. A resposta final é retornada ao usuário
+1. Requisição chega ao microserviço Acesso (5001)
+2. Dados são validados
+3. Score é calculado
+4. Acesso envia dados ao Armazenamento (5000)
+5. Armazenamento salva e devolve a resposta
+6. Acesso retorna ao usuário
 
 ### Operações Bancárias
 
 * Saque e depósito
-* Regras de cheque especial
-* Score recalculado após cada operação
+* Regras de limite e cheque especial
+* Recalculo de score após cada operação
 
 ---
 
-## 🚨 Regras de Negócio
+## Regras de Negócio
 
 ### Score
 
 ```
-score = saldo × 0.1
+score = saldo_cc × 0.1
 ```
-
-Nunca pode ser menor que zero.
 
 ### Cheque Especial
 
@@ -92,15 +89,13 @@ Nunca pode ser menor que zero.
 limite = score × 3
 ```
 
-### Saque
-
-Permitido somente se:
+### Saque permitido se:
 
 ```
 novo_saldo >= -limite
 ```
 
-### Validações Obrigatórias
+### Validações
 
 * nome → string
 * telefone → string numérica (10–11 dígitos)
@@ -109,21 +104,13 @@ novo_saldo >= -limite
 
 ---
 
-# 🔗 Endpoints e Exemplos de Requisição
-
----
-
 # 🔷 Microserviço de Acesso
 
 **Base URL:** `http://127.0.0.1:5001`
 
----
+### POST /clientes
 
-## 📌 Criar Cliente
-
-### **POST /clientes**
-
-### Corpo da requisição:
+Criar cliente
 
 ```json
 {
@@ -134,25 +121,17 @@ novo_saldo >= -limite
 }
 ```
 
----
+### GET /clientes
 
-## 📌 Listar Clientes
+Listar todos
 
-### **GET /clientes**
+### GET /clientes/1
 
----
+Buscar cliente
 
-## 📌 Buscar Cliente
+### PUT /clientes/1
 
-### **GET /clientes/1**
-
----
-
-## 📌 Atualizar Cliente
-
-### **PUT /clientes/1**
-
-### Exemplo:
+Atualizar cliente
 
 ```json
 {
@@ -161,25 +140,17 @@ novo_saldo >= -limite
 }
 ```
 
----
+### DELETE /clientes/1
 
-## 📌 Deletar Cliente
+Remover cliente
 
-### **DELETE /clientes/1**
+### GET /clientes/1/score
 
----
+Consultar score
 
-## 📌 Consultar Score
+### POST /clientes/1/operacao
 
-### **GET /clientes/1/score**
-
----
-
-## 📌 Operação (saque/deposito)
-
-### **POST /clientes/1/operacao**
-
-### Depósito:
+Depósito:
 
 ```json
 {
@@ -188,7 +159,7 @@ novo_saldo >= -limite
 }
 ```
 
-### Saque:
+Saque:
 
 ```json
 {
@@ -203,7 +174,7 @@ novo_saldo >= -limite
 
 **Base URL:** `http://127.0.0.1:5000`
 
-### Endpoints:
+### Endpoints Internos
 
 ```
 POST   /clientes
@@ -215,21 +186,21 @@ DELETE /clientes/<id>
 
 ---
 
-# 🚀 Como Executar o Projeto
+# 🚀 Como Executar
 
-### 1️⃣ Instalar dependências
+### Instalar dependências
 
 ```
 pip install flask requests pytest pytest-cov
 ```
 
-### 2️⃣ Iniciar microserviço de armazenamento
+### Iniciar microserviço de armazenamento
 
 ```
 python3 -m micro_servico.controller
 ```
 
-### 3️⃣ Iniciar microserviço de acesso
+### Iniciar microserviço de acesso
 
 ```
 python3 -m acesso.controller
@@ -237,18 +208,18 @@ python3 -m acesso.controller
 
 ---
 
-# 🧪 Testes Unitários
+# 🧪 Testes
 
-### Rodar os testes:
+Executar:
 
 ```
 pytest -vv
 ```
 
-São testados:
+Cobertura inclui:
 
 * Validações
-* Regras de score e limite
+* Score e limite
 * Serviços
 * Operações bancárias
 
