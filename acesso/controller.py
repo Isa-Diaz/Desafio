@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flasgger import Swagger
 from .service import criar_cliente_service, atualizar_cliente_service, calcular_score, operacao_service
