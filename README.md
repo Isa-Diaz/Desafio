@@ -1,8 +1,8 @@
-# 🏦 Sistema Bancário em Microserviços 🏦
+# 🏦 Sistema Bancário em Microserviços🏦
 
 ## Sobre o Projeto
 
-Este projeto utiliza arquitetura de microserviços para simular um sistema bancário simples composto por dois serviços independentes:
+Este sistema simula um ambiente bancário utilizando **arquitetura de microserviços**, dividido em:
 
 ### 🔷 Microserviço Acesso (porta 5001)
 
@@ -10,17 +10,19 @@ Responsável por:
 
 * Validação de dados
 * Regras bancárias
-* Cálculo de score e limite
+* Cálculo de score
 * Saque e depósito
 * Comunicação com o microserviço de armazenamento
+* Documentação Swagger integrada
 
 ### 🔶 Microserviço Armazenamento (porta 5000)
 
 Responsável por:
 
 * Persistência dos dados
-* CRUD completo em SQLite
+* CRUD em SQLite
 * Respostas diretas ao microserviço de acesso
+* Documentação Swagger integrada
 
 ---
 
@@ -30,6 +32,7 @@ Responsável por:
 * Flask
 * SQLite
 * Requests
+* Flasgger (Swagger)
 * Pytest
 
 ---
@@ -58,57 +61,58 @@ servidor/
 
 ## Fluxo Geral
 
-### Criar Cliente
+### **Criar Cliente**
 
-1. Requisição chega ao microserviço Acesso (5001)
+1. Requisição chega no microserviço **Acesso (5001)**
 2. Dados são validados
 3. Score é calculado
-4. Acesso envia dados ao Armazenamento (5000)
-5. Armazenamento salva e devolve a resposta
-6. Acesso retorna ao usuário
+4. Acesso envia os dados ao microserviço **Armazenamento (5000)**
+5. Armazenamento grava no banco
+6. Acesso retorna a resposta ao usuário
 
-### Operações Bancárias
+### **Operações Bancárias**
 
 * Saque e depósito
 * Regras de limite e cheque especial
-* Recalculo de score após cada operação
+* Score recalculado após operações bancárias
 
 ---
 
 ## Regras de Negócio
 
-### Score
+### **Score**
 
 ```
 score = saldo_cc × 0.1
 ```
 
-### Cheque Especial
+### **Cheque especial**
 
 ```
 limite = score × 3
 ```
 
-### Saque permitido se:
+### **Regra para saque**
 
 ```
 novo_saldo >= -limite
 ```
 
-### Validações
+### **Validações**
 
 * nome → string
-* telefone → string numérica (10–11 dígitos)
+* telefone → string numérica de 10–11 dígitos
 * correntista → boolean
 * saldo_cc → número ≥ 0
 
 ---
 
-# 🔷 Microserviço de Acesso
+# 🔷 Microserviço de Acesso (porta 5001)
 
-**Base URL:** `http://127.0.0.1:5001`
+Base URL:
+`http://127.0.0.1:5001`
 
-### POST /clientes
+### **POST /clientes**
 
 Criar cliente
 
@@ -121,34 +125,38 @@ Criar cliente
 }
 ```
 
-### GET /clientes
+### **GET /clientes**
 
-Listar todos
+Listar clientes
 
-### GET /clientes/1
+### **GET /clientes/1**
 
-Buscar cliente
+Buscar cliente por ID
 
-### PUT /clientes/1
+### **PUT /clientes/1**
 
 Atualizar cliente
 
 ```json
 {
   "nome": "Isabella",
-  "telefone": "11999998888"
+  "telefone": "11999998888",
+  "correntista": true,
+  "saldo_cc": 350
 }
 ```
 
-### DELETE /clientes/1
+### **DELETE /clientes/1**
 
-Remover cliente
+Excluir cliente
 
-### GET /clientes/1/score
+### **GET /clientes/1/score**
 
 Consultar score
 
-### POST /clientes/1/operacao
+### **POST /clientes/1/operacao**
+
+Operações bancárias
 
 Depósito:
 
@@ -170,19 +178,30 @@ Saque:
 
 ---
 
-# 🔶 Microserviço de Armazenamento
+# 🔶 Microserviço de Armazenamento (porta 5000)
 
-**Base URL:** `http://127.0.0.1:5000`
+Base URL:
+`http://127.0.0.1:5000`
 
-### Endpoints Internos
+### **POST /clientes**
 
-```
-POST   /clientes
-GET    /clientes
-GET    /clientes/<id>
-PUT    /clientes/<id>
-DELETE /clientes/<id>
-```
+Criar cliente
+
+### **GET /clientes**
+
+Listar clientes
+
+### **GET /clientes/<id>**
+
+Buscar cliente
+
+### **PUT /clientes/<id>**
+
+Atualizar cliente
+
+### **DELETE /clientes/<id>**
+
+Excluir cliente
 
 ---
 
@@ -191,16 +210,16 @@ DELETE /clientes/<id>
 ### Instalar dependências
 
 ```
-pip install flask requests pytest pytest-cov
+pip install flask flasgger requests pytest pytest-cov
 ```
 
-### Iniciar microserviço de armazenamento
+### Iniciar microserviço de armazenamento (porta 5000)
 
 ```
 python3 -m micro_servico.controller
 ```
 
-### Iniciar microserviço de acesso
+### Iniciar microserviço de acesso (porta 5001)
 
 ```
 python3 -m acesso.controller
@@ -208,19 +227,34 @@ python3 -m acesso.controller
 
 ---
 
+# 📘 Documentação Swagger (Flasgger)
+
+Ambos os microserviços têm documentação automática:
+
+### 🔷 Swagger — Microserviço de Acesso
+
+`http://127.0.0.1:5001/apidocs`
+
+### 🔶 Swagger — Microserviço de Armazenamento
+
+`http://127.0.0.1:5000/apidocs`
+
+---
+
 # 🧪 Testes
 
-Executar:
+Executar testes:
 
 ```
 pytest -vv
 ```
 
-Cobertura inclui:
+Cobrem:
 
 * Validações
-* Score e limite
+* Regras de score e limite
 * Serviços
 * Operações bancárias
+* Fluxo completo entre microserviços
 
 ---
