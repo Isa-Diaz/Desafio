@@ -54,7 +54,11 @@ servidor/
 │   ├── database.py
 │   └── __init__.py
 │
-└── tests/
+├── tests/
+│   ├── test_calculos.py
+│   ├── test_service.py
+│   ├── teste_validacoes.py
+│   └── __init__.py
 ```
 
 ---
